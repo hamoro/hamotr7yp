@@ -1,68 +1,84 @@
 const Discord = require('discord.js');
 const client = new Discord.Client();
 
-client.on("guildMemberAdd", member => {
-      let starcode = member.guild.channels.find("name","ask");
-      if(!starcode) return;
-      if(starcode) {
-     
-         
-       var Canvas = require('canvas')
-      var jimp = require('jimp')
-     
-      const w = ['./img/20180806_230413.png'];
-     
-              let Image = Canvas.Image,
-                  canvas = new Canvas(557, 241),
-                  ctx = canvas.getContext('2d');
- 
-              fs.readFile(`${w[Math.floor(Math.random() * w.length)]}`, function (err, Background) {
-                  if (err) return console.log(err)
-                  let BG = Canvas.Image;
-                  let ground = new Image;
-                  ground.src = Background;
-                  ctx.drawImage(ground, 0, 0, 557, 241);
-     
-      })
-     
-                      let url = member.user.displayAvatarURL.endsWith(".webp") ? member.user.displayAvatarURL.slice(5, -20) + ".gif" : member.user.displayAvatarURL;
-                      jimp.read(url, (err, ava) => {
-                          if (err) return console.log(err);
-                          ava.getBuffer(jimp.MIME_PNG, (err, buf) => {
-                              if (err) return console.log(err);
-     
-                                    ctx.font = '25px Arial Bold';
-                              ctx.fontSize = '20px';
-                              ctx.fillStyle = "#FFFFFF";
-                                ctx.fillText(member.user.username, 300, 120);
-                             
-                              //NAMEً
-                              ctx.font = '25px Arial';
-                              ctx.fontSize = '28px';
-                              ctx.fillStyle = "#FFFFFF";
-      ctx.fillText(`Welcome To ${member.guild.name}`, 260, 60);
-     
-                              //AVATARً
-                              let Avatar = Canvas.Image;
-                              let ava = new Avatar;
-                              ava.src = buf;
-                              ctx.beginPath();
-                 ctx.arc(149, 118, 98, 0, Math.PI*2, true);
-                   ctx.closePath();
-                   
-                                 ctx.clip();
- 
-                        ctx.drawImage(ava, 49, 17, 200, 200);
-                              ctx.closePath();
-                           
-    starcode.sendFile(canvas.toBuffer())
-     
- 
-     
-      })
-      })
-     
-      }
-      });
+client.on('message', async message =>{
+  var prefix = "+";  //alpha codes
+if (message.author.omar) return; //alpha codes
+if (!message.content.startsWith(prefix)) return; //alpha codes
+if(!message.channel.guild) return message.channel.send('**هذا الأمر فقط للسيرفرات**').then(m => m.delete(5000));
+if(!message.member.hasPermission('MANAGE_ROLES'));
+if(!message.guild.member(client.user).hasPermission("MANAGE_ROLES")) return message.reply("**I Don't Have `MANAGE_ROLES` Permission**").then(msg => msg.delete(6000))
+var command = message.content.split(" ")[0];
+command = command.slice(prefix.length);
+var args = message.content.split(" ").slice(1);
+	if(command == "اسكت") {
+    let tomute = message.guild.member(message.mentions.users.first() || message.guild.members.get(args[0]));
+    if(!tomute) return message.reply("**يجب عليك المنشن اولاّ**:x: ") .then(m => m.delete(5000));
+    if(tomute.hasPermission("MANAGE_MESSAGES"))return      message.channel.send('**للأسف لا أمتلك صلاحية** `MANAGE_MASSAGEES`');
+    let muterole = message.guild.roles.find(`name`, "muted");
+    //start of create role
+    if(!muterole){ //alpha codes
+      try{
+        muterole = await message.guild.createRole({
+          name: "muted",
+          color: "#000000",
+          permissions:[]
+        }) //alpha codes
+        message.guild.channels.forEach(async (channel, id) => {
+          await channel.overwritePermissions(muterole, {
+            SEND_MESSAGES: false,
+            ADD_REACTIONS: false
+          });
+        }); //alpha codes
+      }catch(e){ //alpha codes
+        console.log(e.stack);
+      } //alpha codes
+    }
+    //end of create role
+    let mutetime = args[1];
+    if(!mutetime) return message.reply("**يرجى تحديد وقت الميوت**:x:");
+  
+    await(tomute.addRole(muterole.id));
+    message.reply(`<@${tomute.id}> تم اعطائه ميوت ومدة الميوت : ${ms(ms(mutetime))}`);
+  
+    setTimeout(function(){
+      tomute.removeRole(muterole.id);
+      message.channel.send(`<@${tomute.id}> **انقضى الوقت وتم فك الميوت عن الشخص**:white_check_mark: `);
+    }, ms(mutetime));
+  
+  
+  //alpha codes
+  } //alpha codes
+});
+client.on('message', async message =>{
+  var prefix = "ت"; //alpha codes
+if (message.author.omar) return;
+if (!message.content.startsWith(prefix)) return;
+if(!message.channel.guild) return message.channel.send('**هذا الأمر فقط للسيرفرات**').then(m => m.delete(5000));
+if(!message.member.hasPermission('MANAGE_ROLES'));
+if(!message.guild.member(client.user).hasPermission("MANAGE_ROLES")) return message.reply("**I Don't Have `MANAGE_ROLES` Permission**").then(msg => msg.delete(6000))
+var command = message.content.split(" ")[0];
+command = command.slice(prefix.length);
+var args = message.content.split(" ").slice(1);
+if(command === `كلم`) {
+  if(!message.member.hasPermission("MANAGE_ROLES")) return message.channel.sendMessage("**ليس لديك صلاحية لفك عن الشخص ميوت**:x: ").then(msg => msg.delete(6000))
+
+
+  let toMute = message.guild.member(message.mentions.users.first()) || message.guild.members.get(args[0]);
+  if(!toMute) return message.channel.sendMessage("**عليك المنشن أولاّ**:x: ");
+
+  let role = message.guild.roles.find (r => r.name === "muted");
+  
+  if(!role || !toMute.roles.has(role.id)) return message.channel.sendMessage("**لم يتم اعطاء هذه شخص ميوت من الأساس**:x:")
+
+  await toMute.removeRole(role)
+  message.channel.sendMessage("**لقد تم فك الميوت عن شخص بنجاح**:white_check_mark:");
+
+  return;
+ //alpha codes
+  }
+
+}); //alpha codes
+ //alpha codes
 // THIS  MUST  BE  THIS  WAY
 client.login(process.env.BOT_TOKEN);
