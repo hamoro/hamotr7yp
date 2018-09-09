@@ -6,7 +6,7 @@ client.on('ready', () => {
 });
 
 client.on('guildMemberAdd', member => {
-const channel = member.guild.channels.find("name","ask)
+const channel = member.guild.channels.find("name","ask")
 if (member.user.bot) return;
 var Canvas = require('canvas-prebuilt')  
 var jimp = require('jimp')
